@@ -3,21 +3,23 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const Task = require("../models/Task");
 
-router.get("/test", auth, (req, res) => {
-  res.json({
-    message: "Task routes are working!",
-    user: req.user,
-    token: req.token,
-  });
-});
-
 // CRUD users
 router.post("/to-do", auth, async (req, res) => {
   try {
+    const { title, description, completed, status } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
     const task = new Task({
-      ...req.body,
+      title,
+      description,
+      completed,
+      status,
       owner: req.user._id,
     });
+
     await task.save();
     res.status(201).json({ task, message: "Task Created Successfully" });
   } catch (error) {
@@ -59,11 +61,12 @@ router.get("/:id", auth, async (req, res) => {
 
 router.patch("/:id", auth, async (req, res) => {
   const taskId = req.params.id;
+  const allowedUpdates = ["title", "description", "status"];
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["description", "completed"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );
+
   if (!isValidOperation) {
     return res.status(400).send({ error: "Invalid updates!" });
   }
