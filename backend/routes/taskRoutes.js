@@ -3,7 +3,44 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const Task = require("../models/Task");
 
-// CRUD users
+/**
+ * @swagger
+ * tags:
+ *   name: Tasks
+ *   description: Task management APIs
+ */
+
+/**
+ * @swagger
+ * /tasks/to-do:
+ *   post:
+ *     summary: Create a new task
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               completed:
+ *                 type: boolean
+ *               status:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Task created successfully
+ *       400:
+ *         description: Title is required
+ */
 router.post("/to-do", auth, async (req, res) => {
   try {
     const { title, description, completed, status } = req.body;
@@ -27,6 +64,18 @@ router.post("/to-do", auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks:
+ *   get:
+ *     summary: Get all tasks of the authenticated user
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of tasks
+ */
 router.get("/", auth, async (req, res) => {
   try {
     const tasks = await Task.find({ owner: req.user._id });
@@ -40,6 +89,27 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   get:
+ *     summary: Get a specific task by ID
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *     responses:
+ *       200:
+ *         description: Task fetched successfully
+ *       404:
+ *         description: Task not found
+ */
 router.get("/:id", auth, async (req, res) => {
   const taskId = req.params.id;
   if (!taskId) {
@@ -59,6 +129,42 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   patch:
+ *     summary: Update a specific task by ID
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Task updated successfully
+ *       400:
+ *         description: Invalid updates or missing ID
+ *       404:
+ *         description: Task not found
+ */
 router.patch("/:id", auth, async (req, res) => {
   const taskId = req.params.id;
   const allowedUpdates = ["title", "description", "status"];
@@ -94,6 +200,27 @@ router.patch("/:id", auth, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Delete a task by ID
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Task ID
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       404:
+ *         description: Task not found
+ */
 router.delete("/:id", auth, async (req, res) => {
   const taskId = req.params.id;
   if (!taskId) {

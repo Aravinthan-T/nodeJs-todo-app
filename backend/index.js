@@ -10,7 +10,14 @@ const taskRoutes = require("./routes/taskRoutes");
 
 require("./db");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
+
+// ✅ ADD: Swagger UI setup
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger"); // Make sure swagger.js exists in same directory
+
+// ✅ ADD: Swagger route (before other routes or app.listen)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Enable CORS before routes
 app.use(
@@ -31,6 +38,6 @@ app.use("/tasks", taskRoutes);
 
 console.log("✅ Loaded PORT:", PORT);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on port - ${PORT}`);
 });
