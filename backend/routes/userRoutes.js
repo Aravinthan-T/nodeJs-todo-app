@@ -39,15 +39,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).send({ error: "User not found" });
     }
 
-    console.log("Stored hashed password:", user.password);
-    console.log("Plain password entered:", password);
-
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("Password match result:", isMatch);
 
-    if (!isMatch) {
-      return res.status(400).send({ error: "Invalid credentials" });
-    }
 
     const token = jwt.sign(
       { _id: user._id.toString() },
